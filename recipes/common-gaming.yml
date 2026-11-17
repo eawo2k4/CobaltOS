@@ -1,0 +1,49 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/module-list-v1.json
+# Shared CobaltOS setup, used by every edition (recipe.yml, recipe-nvidia.yml).
+# Edit this file to change what all editions get.
+modules:
+  - type: files
+    files:
+      - source: system
+        destination: / # copies files/system/* into the image's root folder /
+
+  - type: dnf
+    install:
+      packages:
+        # Wine: runs Windows 98SE/XP-era and newer games directly
+        - wine
+        - winetricks
+        # Lutris: game library and install scripts (manages Wine/DXVK versions)
+        - lutris
+        # Performance helpers
+        - gamemode
+        - mangohud
+        - gamescope
+        # Handy terminal editor
+        - micro
+    remove:
+      packages:
+        # replaced by the Firefox flatpak below
+        - firefox
+        - firefox-langpacks
+
+  - type: default-flatpaks
+    configurations:
+      - notify: true
+        scope: system
+        install:
+          # 86Box: emulates real 90s PCs for Windows 3.1 / 95 / 98 / ME
+          - net._86box._86Box
+          # DOSBox-X: DOS and Windows 3.1 games
+          - com.dosbox_x.DOSBox-X
+          # Bottles: easy Wine "bottles" per game
+          - com.usebottles.bottles
+          # Steam (includes Proton for newer Windows games)
+          - com.valvesoftware.Steam
+          # ProtonUp-Qt: install extra Proton / Wine-GE versions
+          - net.davidotek.pupgui2
+          - org.mozilla.firefox
+      - scope: user # also add the Flathub user repo
+
+  - type: signing # sets up the policy & signing files for signed images

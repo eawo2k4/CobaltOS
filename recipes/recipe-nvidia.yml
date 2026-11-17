@@ -1,0 +1,12 @@
+---
+# yaml-language-server: $schema=https://schema.blue-build.org/recipe-v1.json
+# CobaltOS - KDE Plasma edition with NVIDIA drivers preinstalled
+# image will be published to ghcr.io/eawo2k4/cobaltos-nvidia
+name: cobaltos-nvidia
+description: CobaltOS - play your old Windows games (3.1 to XP and beyond) on Fedora. KDE edition with NVIDIA drivers.
+
+base-image: ghcr.io/ublue-os/kinoite-nvidia
+image-version: 45 # keep in sync with recipe.yml
+
+modules:
+  - from-file: common-gaming.yml
