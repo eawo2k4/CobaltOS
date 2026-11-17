@@ -2,9 +2,15 @@
 # (see .github/workflows/build-iso.yml). bootc-image-builder reads the
 # package repositories for the installer from this container, so they are
 # written out explicitly here with the Fedora version filled in.
+#
+# RPM-GPG-KEY-fedora-45-primary is Fedora's public package signing key, from
+# https://src.fedoraproject.org/rpms/fedora-repos (when moving to a new
+# Fedora, add that version's key and update FEDORA_VERSION).
 ARG FEDORA_VERSION=45
 FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION}
 ARG FEDORA_VERSION
+
+COPY RPM-GPG-KEY-fedora-${FEDORA_VERSION}-primary /etc/pki/rpm-gpg/cobalt-iso-fedora.gpg
 
 RUN rm -f /etc/yum.repos.d/*.repo && \
     printf '%s\n' \
@@ -13,14 +19,13 @@ RUN rm -f /etc/yum.repos.d/*.repo && \
       "metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-${FEDORA_VERSION}&arch=x86_64" \
       "enabled=1" \
       "gpgcheck=1" \
-      "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64" \
+      "gpgkey=file:///etc/pki/rpm-gpg/cobalt-iso-fedora.gpg" \
       "" \
       "[updates]" \
       "name=Fedora ${FEDORA_VERSION} - x86_64 - Updates" \
       "metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-released-f${FEDORA_VERSION}&arch=x86_64" \
       "enabled=1" \
       "gpgcheck=1" \
-      "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64" \
+      "gpgkey=file:///etc/pki/rpm-gpg/cobalt-iso-fedora.gpg" \
       > /etc/yum.repos.d/fedora-iso.repo && \
-    test -e /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64 && \
     cat /etc/yum.repos.d/fedora-iso.repo

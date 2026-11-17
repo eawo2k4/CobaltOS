@@ -50,8 +50,9 @@ jobs:
 
       - name: Make the installer build container
         run: |
+          set -o pipefail
           sudo podman build --build-arg FEDORA_VERSION=${{ env.FEDORA_VERSION }} \
-            -t localhost/cobalt-iso-builder:latest -f iso/Containerfile iso
+            -t localhost/cobalt-iso-builder:latest -f iso/Containerfile iso 2>&1 | tee build.log
 
       - name: Build the installer ISO
         run: |
