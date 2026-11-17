@@ -1,0 +1,5 @@
+# Kernel arguments for every CobaltOS install (applied by bootc on install and
+# on updates). Plymouth only shows the graphical boot splash (the CobaltOS
+# logo) when "rhgb" is on the kernel command line; "quiet" hides the kernel's
+# text messages so they don't cover it.
+kargs = ["rhgb", "quiet"]

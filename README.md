@@ -85,6 +85,7 @@ ISOs are too big for GitHub Releases (2 GB limit), so a public download needs ot
   - `usr/share/cobaltos/artwork/`: wallpaper and boot splash artwork (SVG, rendered to PNG during the build)
   - `usr/share/wallpapers/CobaltOS/`: the default KDE wallpaper (desktop, lock screen, login)
   - `usr/share/plymouth/themes/cobaltos/` + `etc/plymouth/plymouthd.conf`: the boot splash
+  - `usr/lib/bootc/kargs.d/00-cobaltos-splash.toml`: kernel arguments (`rhgb quiet`) so the boot splash shows
 - `files/scripts/cobalt-setup.sh` runs during the build.
 - The `check` workflow smoke-tests the Welcome Center headlessly on every push.
 - Every push to GitHub rebuilds the images through GitHub Actions. They also rebuild daily to pick up Fedora updates.
