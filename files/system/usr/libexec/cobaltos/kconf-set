@@ -1,0 +1,50 @@
+#!/usr/bin/python3
+"""Set one key in a KDE-style INI file, keeping everything else as it is.
+
+Usage: kconf-set FILE GROUP KEY VALUE
+GROUP is written without the outer brackets, e.g. "General" or, for nested
+groups as used in look-and-feel "defaults" files, "kdeglobals][General".
+(Python's configparser lowercases keys and mangles KDE files, so we don't use it.)
+"""
+import os
+import re
+import sys
+
+
+def kconf_set(path, group, key, value):
+    lines = []
+    if os.path.exists(path):
+        with open(path, encoding="utf-8") as f:
+            lines = f.read().splitlines()
+    header = f"[{group}]"
+    entry = f"{key}={value}"
+    key_re = re.compile(rf"^{re.escape(key)}(\[\$[a-z]+\])?\s*=")
+    if header not in lines:
+        if lines and lines[-1].strip():
+            lines.append("")
+        lines += [header, entry]
+    else:
+        start = lines.index(header) + 1
+        end = start
+        while end < len(lines) and not lines[end].startswith("["):
+            end += 1
+        for i in range(start, end):
+            if key_re.match(lines[i]):
+                lines[i] = entry
+                break
+        else:
+            pos = end
+            while pos > start and not lines[pos - 1].strip():
+                pos -= 1
+            lines.insert(pos, entry)
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    tmp = path + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    os.replace(tmp, path)
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        sys.exit(__doc__)
+    kconf_set(*sys.argv[1:])

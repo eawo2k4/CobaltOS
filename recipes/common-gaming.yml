@@ -22,6 +22,8 @@ modules:
         - gamescope
         # Handy terminal editor
         - micro
+        # System info with the CobaltOS logo (run: fastfetch)
+        - fastfetch
         # Needed by the CobaltOS Welcome Center
         - python3-pyqt6
         - pciutils
@@ -37,6 +39,7 @@ modules:
   - type: script
     scripts:
       - cobalt-setup.sh # welcome center, wallpaper, boot splash, icon cache
+      - cobalt-branding.sh # system name, colour scheme, global theme, login splash, logos
 
   - type: default-flatpaks
     configurations:

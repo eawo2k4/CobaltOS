@@ -1,0 +1,63 @@
+#!/usr/bin/python3
+"""Build the CobaltOS KDE colour scheme from Breeze Dark.
+
+Usage: make-colorscheme BREEZEDARK.colors OUT.colors
+Keeps Breeze Dark's contrast but tints its greys towards cobalt navy and
+uses the CobaltOS blues for selections and focus highlights.
+"""
+import re
+import sys
+
+SELECTION = "37,99,235"       # cobalt-500 #2563eb
+SELECTION_ALT = "29,78,216"   # cobalt-600 #1d4ed8
+FOCUS = "91,192,235"          # brand cyan #5bc0eb
+
+
+def tint(rgb):
+    r, g, b = (int(x) for x in rgb.split(",")[:3])
+    return f"{round(r * 0.55)},{round(g * 0.72)},{min(255, round(b * 1.05 + 32))}"
+
+
+def main(src, out):
+    group = ""
+    result = []
+    with open(src, encoding="utf-8") as f:
+        for line in f.read().splitlines():
+            m = re.match(r"^\[(.*)\]$", line)
+            if m:
+                group = m.group(1)
+                result.append(line)
+                continue
+            if "=" not in line:
+                result.append(line)
+                continue
+            key, value = line.split("=", 1)
+            key = key.strip()
+            is_rgb = re.fullmatch(r"\d+,\d+,\d+(,\d+)?", value.strip())
+            if group == "General" and key.startswith("Name"):
+                if key == "Name":
+                    result.append("Name=CobaltOS")
+                continue  # drop translated Breeze Dark names
+            if group == "General" and key == "ColorScheme":
+                result.append("ColorScheme=CobaltOS")
+                continue
+            if group == "Colors:Selection" and key == "BackgroundNormal":
+                result.append(f"{key}={SELECTION}")
+            elif group == "Colors:Selection" and key == "BackgroundAlternate":
+                result.append(f"{key}={SELECTION_ALT}")
+            elif group.startswith("Colors:") and key in ("DecorationFocus", "DecorationHover"):
+                result.append(f"{key}={FOCUS}")
+            elif is_rgb and group.startswith("Colors:") and key.startswith("Background") and group != "Colors:Selection":
+                result.append(f"{key}={tint(value.strip())}")
+            elif is_rgb and group == "WM" and key in ("activeBackground", "activeBlend", "inactiveBackground", "inactiveBlend"):
+                result.append(f"{key}={tint(value.strip())}")
+            else:
+                result.append(line)
+    with open(out, "w", encoding="utf-8") as f:
+        f.write("\n".join(result) + "\n")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        sys.exit(__doc__)
+    main(*sys.argv[1:])
