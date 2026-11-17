@@ -1,0 +1,26 @@
+# Helper container used only while building the installer ISO
+# (see .github/workflows/build-iso.yml). bootc-image-builder reads the
+# package repositories for the installer from this container, so they are
+# written out explicitly here with the Fedora version filled in.
+ARG FEDORA_VERSION=45
+FROM quay.io/fedora/fedora-bootc:${FEDORA_VERSION}
+ARG FEDORA_VERSION
+
+RUN rm -f /etc/yum.repos.d/*.repo && \
+    printf '%s\n' \
+      "[fedora]" \
+      "name=Fedora ${FEDORA_VERSION} - x86_64" \
+      "metalink=https://mirrors.fedoraproject.org/metalink?repo=fedora-${FEDORA_VERSION}&arch=x86_64" \
+      "enabled=1" \
+      "gpgcheck=1" \
+      "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64" \
+      "" \
+      "[updates]" \
+      "name=Fedora ${FEDORA_VERSION} - x86_64 - Updates" \
+      "metalink=https://mirrors.fedoraproject.org/metalink?repo=updates-released-f${FEDORA_VERSION}&arch=x86_64" \
+      "enabled=1" \
+      "gpgcheck=1" \
+      "gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64" \
+      > /etc/yum.repos.d/fedora-iso.repo && \
+    test -e /etc/pki/rpm-gpg/RPM-GPG-KEY-fedora-${FEDORA_VERSION}-x86_64 && \
+    cat /etc/yum.repos.d/fedora-iso.repo

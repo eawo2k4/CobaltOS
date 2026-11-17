@@ -10,7 +10,8 @@ on:
   push:
     branches: [main]
     paths:
-      - .github/workflows/build-iso.yml # rebuild when this file changes
+      - .github/workflows/build-iso.yml # rebuild when the ISO setup changes
+      - iso/**
 
 concurrency:
   group: build-iso
@@ -42,10 +43,15 @@ jobs:
           sudo docker image prune --all --force || true
           df -h /
 
-      - name: Pull the CobaltOS image and the Fedora build container
+      - uses: actions/checkout@v4
+
+      - name: Pull the CobaltOS image
+        run: sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
+
+      - name: Make the installer build container
         run: |
-          sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
-          sudo podman pull quay.io/fedora/fedora-bootc:${{ env.FEDORA_VERSION }}
+          sudo podman build --build-arg FEDORA_VERSION=${{ env.FEDORA_VERSION }} \
+            -t localhost/cobalt-iso-builder:latest -f iso/Containerfile iso
 
       - name: Build the installer ISO
         run: |
@@ -58,7 +64,7 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type anaconda-iso \
             --rootfs btrfs \
-            --build-container quay.io/fedora/fedora-bootc:${{ env.FEDORA_VERSION }} \
+            --build-container localhost/cobalt-iso-builder:latest \
             ghcr.io/eawo2k4/${{ matrix.image }}:latest 2>&1 | tee build.log
 
       - name: Show the error summary
