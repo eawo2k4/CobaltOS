@@ -67,7 +67,7 @@ The `build-iso` workflow builds an offline installer ISO for each edition. It us
 
 1. Go to **Actions** → **build-iso** → **Run workflow**. A run takes about 30–60 minutes.
 2. Open the finished run and download **cobaltos-iso** or **cobaltos-nvidia-iso** from the Artifacts section. You need to be signed in to GitHub, and the artifacts are kept for 30 days.
-3. Unzip the download, then write `cobaltos.iso` to a USB stick (8 GB or larger) with [Fedora Media Writer](https://fedoraproject.org/workstation/download) or [Rufus](https://rufus.ie) (use "DD image" mode), or boot it in a VM.
+3. Unzip the download, then write `cobaltos.iso` to a USB stick (16 GB or larger; the ISOs are about 7.5 GB) with [Fedora Media Writer](https://fedoraproject.org/workstation/download) or [Rufus](https://rufus.ie) (use "DD image" mode), or boot it in a VM.
 4. Check the download if you like: `sha256sum -c cobaltos.iso.sha256`
 
 The installed system updates itself from `ghcr.io/eawo2k4/cobaltos`. Apps like 86Box and Steam install in the background on first boot, so give it a few minutes online.
