@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160" preserveAspectRatio="xMidYMid slice">
+  <title>CobaltOS wallpaper</title>
+  <defs>
+    <radialGradient id="bg" cx="0.68" cy="0.48" r="0.85">
+      <stop offset="0" stop-color="#1A4FC4"/>
+      <stop offset="0.38" stop-color="#0B2A73"/>
+      <stop offset="1" stop-color="#030817"/>
+    </radialGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#3D7BFF" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#3D7BFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="crystal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3D7BFF" stop-opacity="0.55"/>
+      <stop offset="0.55" stop-color="#0047AB" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#002A6B" stop-opacity="0.55"/>
+    </linearGradient>
+    <pattern id="scan" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="2" fill="#FFFFFF" opacity="0.025"/>
+    </pattern>
+  </defs>
+
+  <rect width="3840" height="2160" fill="url(#bg)"/>
+
+  <!-- glow behind the main crystal -->
+  <circle cx="2750" cy="1080" r="1250" fill="url(#glow)"/>
+
+  <!-- main crystal, echoing the logo -->
+  <g>
+    <polygon points="2750,320 3408,700 3408,1460 2750,1840 2092,1460 2092,700"
+             fill="url(#crystal)" stroke="#7FB0FF" stroke-opacity="0.35" stroke-width="6" stroke-linejoin="round"/>
+    <polygon points="2750,320 2092,700 2750,1080" fill="#FFFFFF" opacity="0.10"/>
+    <polygon points="2750,320 3408,700 2750,1080" fill="#FFFFFF" opacity="0.04"/>
+    <polygon points="2092,1460 2750,1840 2750,1080" fill="#000000" opacity="0.10"/>
+    <polygon points="3408,1460 2750,1840 2750,1080" fill="#000000" opacity="0.18"/>
+    <path d="M3038.5 791.5 A408 408 0 1 0 3038.5 1368.5" fill="none" stroke="#FFFFFF"
+          stroke-opacity="0.12" stroke-width="183"/>
+    <rect x="3073.5" y="995.5" width="169" height="169" fill="#7FD4FF" opacity="0.40"/>
+  </g>
+
+  <!-- smaller crystals -->
+  <g fill="none" stroke="#7FB0FF" stroke-linejoin="round">
+    <polygon points="900,1440 1125,1570 1125,1830 900,1960 675,1830 675,1570" stroke-opacity="0.22" stroke-width="5"/>
+    <polygon points="1500,270 1630,345 1630,495 1500,570 1370,495 1370,345" stroke-opacity="0.18" stroke-width="4"/>
+    <polygon points="3520,140 3615,195 3615,305 3520,360 3425,305 3425,195" stroke-opacity="0.16" stroke-width="4"/>
+    <polygon points="420,520 490,560 490,640 420,680 350,640 350,560" stroke-opacity="0.14" stroke-width="3"/>
+  </g>
+  <polygon points="900,1440 1125,1570 900,1700 675,1570" fill="#3D7BFF" opacity="0.06"/>
+
+  <!-- pixel stars -->
+  <g fill="#7FD4FF">
+    <rect x="3041" y="2066" width="5" height="5" opacity="0.39"/>
+    <rect x="986" y="773" width="5" height="5" opacity="0.78"/>
+    <rect x="1097" y="567" width="8" height="8" opacity="0.70"/>
+    <rect x="1358" y="1215" width="5" height="5" opacity="0.63"/>
+    <rect x="984" y="103" width="5" height="5" opacity="0.35"/>
+    <rect x="1824" y="843" width="8" height="8" opacity="0.81"/>
+    <rect x="3231" y="1962" width="5" height="5" opacity="0.51"/>
+    <rect x="923" y="609" width="14" height="14" opacity="0.80"/>
+    <rect x="1427" y="1597" width="5" height="5" opacity="0.84"/>
+    <rect x="1361" y="21" width="5" height="5" opacity="0.31"/>
+    <rect x="4" y="1161" width="5" height="5" opacity="0.79"/>
+    <rect x="1734" y="1522" width="5" height="5" opacity="0.27"/>
+    <rect x="196" y="1933" width="8" height="8" opacity="0.47"/>
+    <rect x="1017" y="402" width="8" height="8" opacity="0.58"/>
+    <rect x="3619" y="1713" width="8" height="8" opacity="0.34"/>
+    <rect x="176" y="1344" width="5" height="5" opacity="0.41"/>
+    <rect x="1895" y="1712" width="8" height="8" opacity="0.72"/>
+    <rect x="1182" y="808" width="14" height="14" opacity="0.80"/>
+    <rect x="1064" y="1037" width="5" height="5" opacity="0.28"/>
+    <rect x="3617" y="1753" width="8" height="8" opacity="0.56"/>
+    <rect x="1599" y="1999" width="5" height="5" opacity="0.70"/>
+    <rect x="716" y="646" width="14" height="14" opacity="0.80"/>
+    <rect x="614" y="34" width="5" height="5" opacity="0.52"/>
+    <rect x="3754" y="500" width="8" height="8" opacity="0.34"/>
+    <rect x="3628" y="1463" width="8" height="8" opacity="0.81"/>
+    <rect x="1920" y="1602" width="5" height="5" opacity="0.60"/>
+    <rect x="3805" y="1425" width="5" height="5" opacity="0.50"/>
+    <rect x="3620" y="6" width="14" height="14" opacity="0.80"/>
+    <rect x="1832" y="1402" width="5" height="5" opacity="0.64"/>
+    <rect x="2449" y="42" width="8" height="8" opacity="0.36"/>
+    <rect x="562" y="852" width="8" height="8" opacity="0.66"/>
+    <rect x="1664" y="342" width="5" height="5" opacity="0.64"/>
+    <rect x="198" y="1221" width="14" height="14" opacity="0.80"/>
+    <rect x="2009" y="1729" width="8" height="8" opacity="0.44"/>
+    <rect x="751" y="1046" width="5" height="5" opacity="0.39"/>
+    <rect x="0" y="1415" width="14" height="14" opacity="0.80"/>
+    <rect x="1928" y="1915" width="5" height="5" opacity="0.25"/>
+    <rect x="1026" y="465" width="14" height="14" opacity="0.80"/>
+    <rect x="1044" y="563" width="5" height="5" opacity="0.84"/>
+    <rect x="376" y="1080" width="8" height="8" opacity="0.66"/>
+    <rect x="380" y="1158" width="8" height="8" opacity="0.63"/>
+    <rect x="1137" y="1810" width="5" height="5" opacity="0.68"/>
+    <rect x="1261" y="2122" width="8" height="8" opacity="0.40"/>
+    <rect x="1409" y="394" width="5" height="5" opacity="0.37"/>
+    <rect x="2503" y="57" width="14" height="14" opacity="0.80"/>
+    <rect x="230" y="2134" width="8" height="8" opacity="0.62"/>
+    <rect x="1908" y="1959" width="5" height="5" opacity="0.43"/>
+    <rect x="392" y="630" width="5" height="5" opacity="0.43"/>
+    <rect x="1318" y="1725" width="14" height="14" opacity="0.80"/>
+    <rect x="3635" y="1933" width="5" height="5" opacity="0.51"/>
+    <rect x="1279" y="1080" width="5" height="5" opacity="0.49"/>
+    <rect x="1492" y="1739" width="5" height="5" opacity="0.36"/>
+    <rect x="806" y="379" width="14" height="14" opacity="0.80"/>
+    <rect x="1464" y="1063" width="8" height="8" opacity="0.49"/>
+    <rect x="2071" y="313" width="5" height="5" opacity="0.54"/>
+    <rect x="1403" y="154" width="5" height="5" opacity="0.27"/>
+    <rect x="1722" y="1902" width="5" height="5" opacity="0.84"/>
+    <rect x="2853" y="2" width="14" height="14" opacity="0.80"/>
+    <rect x="1753" y="2147" width="5" height="5" opacity="0.28"/>
+    <rect x="3779" y="1426" width="5" height="5" opacity="0.32"/>
+    <rect x="1926" y="477" width="5" height="5" opacity="0.53"/>
+    <rect x="2474" y="2008" width="5" height="5" opacity="0.29"/>
+    <rect x="417" y="243" width="8" height="8" opacity="0.72"/>
+    <rect x="329" y="1262" width="5" height="5" opacity="0.71"/>
+    <rect x="3669" y="2109" width="8" height="8" opacity="0.43"/>
+    <rect x="3590" y="1836" width="5" height="5" opacity="0.31"/>
+    <rect x="1215" y="1012" width="8" height="8" opacity="0.37"/>
+    <rect x="1282" y="838" width="5" height="5" opacity="0.67"/>
+    <rect x="1377" y="1208" width="8" height="8" opacity="0.66"/>
+    <rect x="3286" y="1961" width="5" height="5" opacity="0.27"/>
+    <rect x="1157" y="1482" width="5" height="5" opacity="0.41"/>
+    <rect x="111" y="1128" width="14" height="14" opacity="0.80"/>
+    <rect x="687" y="883" width="5" height="5" opacity="0.43"/>
+    <rect x="75" y="1375" width="8" height="8" opacity="0.50"/>
+    <rect x="3222" y="2136" width="8" height="8" opacity="0.46"/>
+    <rect x="3746" y="630" width="5" height="5" opacity="0.43"/>
+    <rect x="552" y="248" width="5" height="5" opacity="0.42"/>
+    <rect x="2037" y="1796" width="8" height="8" opacity="0.39"/>
+    <rect x="1298" y="1716" width="8" height="8" opacity="0.46"/>
+    <rect x="1872" y="651" width="8" height="8" opacity="0.47"/>
+    <rect x="408" y="236" width="8" height="8" opacity="0.62"/>
+    <rect x="368" y="491" width="8" height="8" opacity="0.42"/>
+    <rect x="429" y="1751" width="14" height="14" opacity="0.80"/>
+    <rect x="745" y="726" width="8" height="8" opacity="0.30"/>
+    <rect x="1019" y="1927" width="8" height="8" opacity="0.48"/>
+    <rect x="914" y="1037" width="14" height="14" opacity="0.80"/>
+    <rect x="1702" y="514" width="14" height="14" opacity="0.80"/>
+    <rect x="3743" y="802" width="14" height="14" opacity="0.80"/>
+    <rect x="783" y="1116" width="8" height="8" opacity="0.80"/>
+    <rect x="1290" y="656" width="5" height="5" opacity="0.56"/>
+  </g>
+
+  <!-- retro scanlines -->
+  <rect width="3840" height="2160" fill="url(#scan)"/>
+</svg>
