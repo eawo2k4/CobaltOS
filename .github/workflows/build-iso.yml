@@ -25,7 +25,9 @@ env:
 jobs:
   iso:
     name: Build ISO (${{ matrix.image }})
-    runs-on: ubuntu-latest
+    # Pinned: osbuild's mounts are blocked by the stricter AppArmor rules on
+    # newer Ubuntu runners.
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     strategy:
@@ -58,8 +60,11 @@ jobs:
         run: |
           mkdir -p output
           set -o pipefail
+          # let osbuild create the namespaces and mounts it needs
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
           sudo podman run --rm --privileged --pull=newer \
             --security-opt label=type:unconfined_t \
+            --security-opt apparmor=unconfined \
             -v ./output:/output \
             -v /var/lib/containers/storage:/var/lib/containers/storage \
             quay.io/centos-bootc/bootc-image-builder:latest \
