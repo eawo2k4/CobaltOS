@@ -59,8 +59,6 @@ jobs:
             --type anaconda-iso \
             --rootfs btrfs \
             --build-container quay.io/fedora/fedora-bootc:${{ env.FEDORA_VERSION }} \
-            --force-repo "https://dl.fedoraproject.org/pub/fedora/linux/releases/${{ env.FEDORA_VERSION }}/Everything/x86_64/os/" \
-            --force-repo "https://dl.fedoraproject.org/pub/fedora/linux/updates/${{ env.FEDORA_VERSION }}/Everything/x86_64/" \
             ghcr.io/eawo2k4/${{ matrix.image }}:latest 2>&1 | tee build.log
 
       - name: Show the error summary
