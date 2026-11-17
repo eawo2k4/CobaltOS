@@ -1,0 +1,593 @@
+#!/usr/bin/env python3
+"""CobaltOS Welcome Center.
+
+Helps new users pick the right tool for their old Windows games, set up
+86Box, check their graphics driver and find help.
+
+Run with --autostart from the login autostart entry (respects the
+"Show at login" checkbox) or --smoke-test for a headless self check.
+"""
+
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+from PyQt6.QtCore import QProcess, QSettings, Qt, QTimer, QUrl
+from PyQt6.QtGui import QDesktopServices, QFont, QIcon
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
+VERSION = "0.1"
+REPO_URL = "https://github.com/eawo2k4/CobaltOS"
+IMAGE_BASE = "ghcr.io/eawo2k4"
+LOGO_PATH = "/usr/share/icons/hicolor/scalable/apps/cobaltos.svg"
+ROMS_ID = "net._86box._86Box.ROMs"
+
+# key -> (display name, flatpak id or None, command if not a flatpak)
+APPS = {
+    "dosbox": ("DOSBox-X", "com.dosbox_x.DOSBox-X", None),
+    "86box": ("86Box", "net._86box._86Box", None),
+    "lutris": ("Lutris", None, ["lutris"]),
+    "bottles": ("Bottles", "com.usebottles.bottles", None),
+    "steam": ("Steam", "com.valvesoftware.Steam", None),
+    "protonup": ("ProtonUp-Qt", "net.davidotek.pupgui2", None),
+}
+
+VENDORS = {"0x10de": "NVIDIA", "0x1002": "AMD", "0x8086": "Intel"}
+
+STYLE = """
+QFrame#card {
+    border: 1px solid palette(mid);
+    border-radius: 10px;
+    background: palette(base);
+}
+QLabel#era { color: #3D7BFF; font-weight: bold; }
+QLabel#ok { color: #2E9E5B; font-weight: bold; }
+QLabel#warn { color: #D9822B; font-weight: bold; }
+QListWidget#sidebar { border: none; font-size: 11pt; }
+QListWidget#sidebar::item { padding: 10px 8px; }
+"""
+
+
+# ---------------------------------------------------------------- helpers
+
+def run(cmd, timeout=10):
+    """Run a command and return (returncode, stdout). Never raises."""
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return res.returncode, res.stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        return 1, ""
+
+
+def flatpak_installed(app_id):
+    if not shutil.which("flatpak"):
+        return False
+    return run(["flatpak", "info", app_id])[0] == 0
+
+
+def app_available(key):
+    _, flatpak_id, cmd = APPS[key]
+    if flatpak_id:
+        return flatpak_installed(flatpak_id)
+    return shutil.which(cmd[0]) is not None
+
+
+def detect_gpus():
+    """List graphics cards from /sys, with names from lspci when available."""
+    gpus, seen = [], set()
+    for card in sorted(Path("/sys/class/drm").glob("card[0-9]*")):
+        if "-" in card.name:  # skip connectors like card0-DP-1
+            continue
+        dev = card / "device"
+        try:
+            vendor_id = (dev / "vendor").read_text().strip()
+            slot = dev.resolve().name
+        except OSError:
+            continue
+        if slot in seen:
+            continue
+        seen.add(slot)
+        driver_link = dev / "driver"
+        driver = driver_link.resolve().name if driver_link.exists() else "none"
+        vendor = VENDORS.get(vendor_id, "Other")
+        name = vendor if vendor != "Other" else f"Unknown ({vendor_id})"
+        if shutil.which("lspci"):
+            code, out = run(["lspci", "-s", slot], timeout=5)
+            if code == 0 and ": " in out:
+                name = out.split(": ", 1)[1]
+        gpus.append({"vendor": vendor, "name": name, "driver": driver})
+    return gpus
+
+
+def is_nvidia_edition():
+    return shutil.which("nvidia-smi") is not None
+
+
+def heading(text, size=18):
+    label = QLabel(text)
+    font = label.font()
+    font.setPointSize(size)
+    font.setWeight(QFont.Weight.Bold)
+    label.setFont(font)
+    label.setWordWrap(True)
+    return label
+
+
+def paragraph(text):
+    label = QLabel(text)
+    label.setWordWrap(True)
+    label.setTextFormat(Qt.TextFormat.RichText)
+    label.setOpenExternalLinks(True)
+    return label
+
+
+def card():
+    frame = QFrame()
+    frame.setObjectName("card")
+    layout = QVBoxLayout(frame)
+    layout.setContentsMargins(16, 14, 16, 14)
+    layout.setSpacing(8)
+    return frame, layout
+
+
+def scroll_page(inner):
+    area = QScrollArea()
+    area.setWidgetResizable(True)
+    area.setFrameShape(QFrame.Shape.NoFrame)
+    area.setWidget(inner)
+    return area
+
+
+def logo_icon():
+    return QIcon.fromTheme("cobaltos", QIcon(LOGO_PATH))
+
+
+# ---------------------------------------------------------------- pages
+
+class WelcomePage(QWidget):
+    def __init__(self, launcher):
+        super().__init__()
+        self.launcher = launcher
+        root = QVBoxLayout(self)
+        root.setContentsMargins(28, 24, 28, 24)
+        root.setSpacing(16)
+
+        top = QHBoxLayout()
+        logo = QLabel()
+        logo.setPixmap(logo_icon().pixmap(72, 72))
+        top.addWidget(logo)
+        titles = QVBoxLayout()
+        titles.addWidget(heading("Welcome to CobaltOS", 22))
+        titles.addWidget(paragraph("Your old Windows games, on modern hardware."))
+        top.addLayout(titles, 1)
+        root.addLayout(top)
+
+        root.addWidget(heading("What do you want to play?", 14))
+
+        grid = QGridLayout()
+        grid.setSpacing(14)
+        grid.addWidget(self.era_card(
+            "DOS and Windows 3.1",
+            "1985 – 1995",
+            "Classic DOS games and Windows 3.1 software. DOSBox-X runs them "
+            "directly, with sound and mouse support.",
+            [("Open DOSBox-X", "dosbox")],
+        ), 0, 0)
+        grid.addWidget(self.era_card(
+            "Windows 95, 98 and ME",
+            "1995 – 2001",
+            "86Box builds a complete 90s PC (Pentium, 3dfx Voodoo, Sound Blaster) "
+            "so even picky games work. You install Windows 9x inside it from your "
+            "own install CD.",
+            [("Open 86Box", "86box")],
+        ), 0, 1)
+        grid.addWidget(self.era_card(
+            "Windows XP and newer",
+            "2001 – today",
+            "Wine runs these games directly on your graphics card, no emulation "
+            "needed. Lutris and Bottles set things up for you; Steam handles "
+            "games you own there.",
+            [("Lutris", "lutris"), ("Bottles", "bottles"), ("Steam", "steam")],
+        ), 1, 0, 1, 2)
+        root.addLayout(grid)
+
+        root.addWidget(paragraph(
+            "<b>Not sure which era a game is from?</b> Look it up on "
+            "<a href='https://www.pcgamingwiki.com'>PCGamingWiki</a>, which also lists "
+            "fixes for modern systems."
+        ))
+        root.addStretch(1)
+
+    def era_card(self, title, years, text, buttons):
+        frame, layout = card()
+        era = QLabel(years)
+        era.setObjectName("era")
+        layout.addWidget(era)
+        layout.addWidget(heading(title, 13))
+        layout.addWidget(paragraph(text))
+        layout.addStretch(1)
+        row = QHBoxLayout()
+        for label, key in buttons:
+            btn = QPushButton(label)
+            btn.clicked.connect(lambda _=False, k=key: self.launcher(k))
+            row.addWidget(btn)
+        row.addStretch(1)
+        layout.addLayout(row)
+        return frame
+
+
+class Box86Page(QWidget):
+    BUILDS = [
+        ("Windows 3.1", "486DX2-66", "16 MB", "Cirrus Logic or S3 Trio64", "Sound Blaster 16"),
+        ("Windows 95", "Pentium 133–200 MMX", "32–64 MB", "S3 Trio64 or ViRGE", "Sound Blaster 16"),
+        ("Windows 98 SE", "Pentium II 300–450", "128 MB", "3dfx Voodoo3 (or S3 + Voodoo2)", "Sound Blaster 16 / AWE64"),
+        ("Windows ME", "Pentium III 600–800", "256 MB", "3dfx Voodoo3", "Ensoniq AudioPCI"),
+    ]
+
+    def __init__(self, launcher):
+        super().__init__()
+        self.launcher = launcher
+        self.proc = None
+        root = QVBoxLayout(self)
+        root.setContentsMargins(28, 24, 28, 24)
+        root.setSpacing(14)
+        root.addWidget(heading("86Box setup"))
+        root.addWidget(paragraph(
+            "86Box emulates real 90s PCs, which is the most reliable way to play "
+            "Windows 95, 98 and ME games."
+        ))
+
+        status, sl = card()
+        sl.addWidget(heading("Status", 13))
+        self.app_status = QLabel()
+        self.rom_status = QLabel()
+        self.rom_button = QPushButton("Install ROM set")
+        self.rom_button.clicked.connect(self.install_roms)
+        rom_row = QHBoxLayout()
+        rom_row.addWidget(self.rom_status)
+        rom_row.addStretch(1)
+        rom_row.addWidget(self.rom_button)
+        sl.addWidget(self.app_status)
+        sl.addLayout(rom_row)
+        open_btn = QPushButton("Open 86Box")
+        open_btn.clicked.connect(lambda: self.launcher("86box"))
+        sl.addWidget(open_btn, alignment=Qt.AlignmentFlag.AlignLeft)
+        root.addWidget(status)
+
+        builds, bl = card()
+        bl.addWidget(heading("Recommended virtual PCs", 13))
+        grid = QGridLayout()
+        grid.setHorizontalSpacing(18)
+        for col, title in enumerate(["For", "CPU", "RAM", "Video", "Sound"]):
+            lbl = QLabel(f"<b>{title}</b>")
+            grid.addWidget(lbl, 0, col)
+        for row, build in enumerate(self.BUILDS, start=1):
+            for col, value in enumerate(build):
+                grid.addWidget(QLabel(value), row, col)
+        bl.addLayout(grid)
+        root.addWidget(builds)
+
+        steps, stl = card()
+        stl.addWidget(heading("Making your first virtual PC", 13))
+        stl.addWidget(paragraph(
+            "1. Open 86Box and click <b>Add</b> to create a new machine.<br>"
+            "2. In <b>Settings → Machine</b>, pick a motherboard and CPU from the table above.<br>"
+            "3. Set the video and sound cards under <b>Display</b> and <b>Sound</b>.<br>"
+            "4. Add a hard disk under <b>Storage</b>, then insert your Windows CD image "
+            "from the <b>Media</b> menu and start the machine.<br><br>"
+            "<b>You need your own Windows install media.</b> CobaltOS does not include Windows. "
+            "See the <a href='https://86box.readthedocs.io'>86Box documentation</a> for more help."
+        ))
+        root.addWidget(steps)
+        root.addStretch(1)
+
+    def refresh(self):
+        if flatpak_installed(APPS["86box"][1]):
+            self.app_status.setText("86Box: installed")
+            self.app_status.setObjectName("ok")
+        else:
+            self.app_status.setText(
+                "86Box: not installed yet (apps install in the background after first boot)"
+            )
+            self.app_status.setObjectName("warn")
+        if self.proc is None:
+            if flatpak_installed(ROMS_ID):
+                self.rom_status.setText("ROM set: installed")
+                self.rom_status.setObjectName("ok")
+                self.rom_button.hide()
+            else:
+                self.rom_status.setText("ROM set: missing (86Box needs it to start a PC)")
+                self.rom_status.setObjectName("warn")
+                self.rom_button.show()
+                self.rom_button.setEnabled(True)
+                self.rom_button.setText("Install ROM set")
+        for widget in (self.app_status, self.rom_status):
+            widget.style().unpolish(widget)
+            widget.style().polish(widget)
+
+    def install_roms(self):
+        if not shutil.which("flatpak"):
+            QMessageBox.warning(self, "CobaltOS", "Flatpak was not found on this system.")
+            return
+        self.rom_button.setEnabled(False)
+        self.rom_button.setText("Installing…")
+        self.proc = QProcess(self)
+        self.proc.finished.connect(self.roms_done)
+        self.proc.start("flatpak", ["install", "--system", "-y", "--noninteractive",
+                                    "flathub", ROMS_ID])
+
+    def roms_done(self, code, _status):
+        output = bytes(self.proc.readAllStandardError()).decode(errors="replace")
+        self.proc = None
+        self.refresh()
+        if code != 0:
+            QMessageBox.warning(self, "CobaltOS",
+                                "Installing the ROM set failed.\n\n" + output[-800:])
+
+
+class GraphicsPage(QWidget):
+    def __init__(self):
+        super().__init__()
+        root = QVBoxLayout(self)
+        root.setContentsMargins(28, 24, 28, 24)
+        root.setSpacing(14)
+        root.addWidget(heading("Graphics check"))
+        root.addWidget(paragraph(
+            "Wine and 86Box run best with the right graphics driver. "
+            "This page checks your card and the CobaltOS edition you're running."
+        ))
+        self.cards_box = QVBoxLayout()
+        root.addLayout(self.cards_box)
+        refresh = QPushButton("Check again")
+        refresh.clicked.connect(self.refresh)
+        root.addWidget(refresh, alignment=Qt.AlignmentFlag.AlignLeft)
+        root.addStretch(1)
+
+    def clear(self):
+        while self.cards_box.count():
+            item = self.cards_box.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+
+    def refresh(self):
+        self.clear()
+        gpus = detect_gpus()
+        nvidia_edition = is_nvidia_edition()
+
+        frame, layout = card()
+        layout.addWidget(heading("Your hardware", 13))
+        edition = "NVIDIA edition" if nvidia_edition else "AMD / Intel edition"
+        layout.addWidget(paragraph(f"CobaltOS edition: <b>{edition}</b>"))
+        if not gpus:
+            layout.addWidget(paragraph("No graphics card could be detected."))
+        for gpu in gpus:
+            layout.addWidget(paragraph(
+                f"<b>{gpu['name']}</b><br>Driver in use: {gpu['driver']}"
+            ))
+        self.cards_box.addWidget(frame)
+
+        has_nvidia = any(g["vendor"] == "NVIDIA" for g in gpus)
+        nvidia_driver_ok = any(g["vendor"] == "NVIDIA" and g["driver"] == "nvidia" for g in gpus)
+
+        if has_nvidia and not nvidia_edition:
+            self.cards_box.addWidget(self.advice(
+                "warn",
+                "You have an NVIDIA card, but you're on the AMD / Intel edition.",
+                "For the best performance, switch to the NVIDIA edition, which "
+                "includes NVIDIA's own driver. Run this in a terminal, then restart:",
+                f"rpm-ostree rebase ostree-image-signed:docker://{IMAGE_BASE}/cobaltos-nvidia:latest",
+            ))
+        elif has_nvidia and not nvidia_driver_ok:
+            self.cards_box.addWidget(self.advice(
+                "warn",
+                "The NVIDIA driver isn't running.",
+                "This usually happens when Secure Boot is turned on and the driver's "
+                "signing key hasn't been enrolled yet. See the "
+                "<a href='https://universal-blue.org'>Universal Blue docs</a> on Secure Boot, "
+                "or turn Secure Boot off in your PC's firmware settings.",
+            ))
+        elif nvidia_edition and not has_nvidia:
+            self.cards_box.addWidget(self.advice(
+                "warn",
+                "You're on the NVIDIA edition, but no NVIDIA card was found.",
+                "Everything will still work, but the AMD / Intel edition is a better "
+                "fit. Run this in a terminal, then restart:",
+                f"rpm-ostree rebase ostree-image-signed:docker://{IMAGE_BASE}/cobaltos:latest",
+            ))
+        elif gpus:
+            self.cards_box.addWidget(self.advice(
+                "ok", "Looks good!",
+                "You're on the right edition for your graphics card.",
+            ))
+
+    def advice(self, kind, title, text, command=None):
+        frame, layout = card()
+        label = QLabel(title)
+        label.setObjectName(kind)
+        label.setWordWrap(True)
+        layout.addWidget(label)
+        layout.addWidget(paragraph(text))
+        if command:
+            row = QHBoxLayout()
+            field = QLineEdit(command)
+            field.setReadOnly(True)
+            copy = QPushButton("Copy")
+            copy.clicked.connect(lambda: QApplication.clipboard().setText(command))
+            row.addWidget(field, 1)
+            row.addWidget(copy)
+            layout.addLayout(row)
+        return frame
+
+
+class HelpPage(QWidget):
+    LINKS = [
+        ("PCGamingWiki", "https://www.pcgamingwiki.com",
+         "Fixes and tweaks for almost every PC game."),
+        ("WineHQ AppDB", "https://appdb.winehq.org",
+         "How well specific games run in Wine, with tips."),
+        ("ProtonDB", "https://www.protondb.com",
+         "Reports on Steam games running through Proton."),
+        ("Lutris games", "https://lutris.net/games",
+         "One-click install scripts for many classic games."),
+        ("86Box documentation", "https://86box.readthedocs.io",
+         "Setting up virtual 90s PCs."),
+        ("DOSBox-X wiki", "https://dosbox-x.com/wiki",
+         "Guides for DOS and Windows 3.1."),
+        ("VOGONS", "https://www.vogons.org",
+         "Friendly forum for retro PC gaming and hardware."),
+        ("CobaltOS on GitHub", REPO_URL + "/issues",
+         "Report a problem or suggest an idea."),
+    ]
+
+    def __init__(self):
+        super().__init__()
+        root = QVBoxLayout(self)
+        root.setContentsMargins(28, 24, 28, 24)
+        root.setSpacing(12)
+        root.addWidget(heading("Help and links"))
+        for name, url, desc in self.LINKS:
+            frame, layout = card()
+            row = QHBoxLayout()
+            text = QVBoxLayout()
+            text.addWidget(heading(name, 12))
+            text.addWidget(paragraph(desc))
+            row.addLayout(text, 1)
+            btn = QPushButton("Open")
+            btn.clicked.connect(lambda _=False, u=url: QDesktopServices.openUrl(QUrl(u)))
+            row.addWidget(btn)
+            layout.addLayout(row)
+            root.addWidget(frame)
+        root.addWidget(paragraph(
+            f"<small>CobaltOS Welcome {VERSION}. CobaltOS does not include Microsoft "
+            "Windows or any games; please use media you own.</small>"
+        ))
+        root.addStretch(1)
+
+
+# ---------------------------------------------------------------- window
+
+class WelcomeWindow(QMainWindow):
+    def __init__(self, settings):
+        super().__init__()
+        self.settings = settings
+        self.setWindowTitle("Welcome to CobaltOS")
+        self.setWindowIcon(logo_icon())
+        self.resize(940, 680)
+
+        self.box86 = Box86Page(self.launch)
+        self.graphics = GraphicsPage()
+        pages = [
+            ("Welcome", "go-home", WelcomePage(self.launch)),
+            ("86Box setup", "computer", self.box86),
+            ("Graphics", "video-display", self.graphics),
+            ("Help", "help-browser", HelpPage()),
+        ]
+
+        self.sidebar = QListWidget()
+        self.sidebar.setObjectName("sidebar")
+        self.sidebar.setFixedWidth(190)
+        self.stack = QStackedWidget()
+        for title, icon, page in pages:
+            self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme(icon), title))
+            self.stack.addWidget(scroll_page(page))
+        self.sidebar.currentRowChanged.connect(self.show_page)
+
+        body = QHBoxLayout()
+        body.setContentsMargins(0, 0, 0, 0)
+        body.setSpacing(0)
+        body.addWidget(self.sidebar)
+        line = QFrame()
+        line.setFrameShape(QFrame.Shape.VLine)
+        body.addWidget(line)
+        body.addWidget(self.stack, 1)
+
+        footer = QHBoxLayout()
+        footer.setContentsMargins(16, 8, 16, 12)
+        self.startup = QCheckBox("Show this window at login")
+        self.startup.setChecked(settings.value("show_at_login", True, type=bool))
+        self.startup.toggled.connect(lambda on: settings.setValue("show_at_login", on))
+        close = QPushButton("Close")
+        close.clicked.connect(self.close)
+        footer.addWidget(self.startup)
+        footer.addStretch(1)
+        footer.addWidget(close)
+
+        central = QWidget()
+        outer = QVBoxLayout(central)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        outer.addLayout(body, 1)
+        outer.addLayout(footer)
+        self.setCentralWidget(central)
+        self.sidebar.setCurrentRow(0)
+
+    def show_page(self, index):
+        self.stack.setCurrentIndex(index)
+        page = self.stack.widget(index).widget()
+        if hasattr(page, "refresh"):
+            page.refresh()
+
+    def launch(self, key):
+        name, flatpak_id, cmd = APPS[key]
+        if not app_available(key):
+            QMessageBox.information(
+                self, "CobaltOS",
+                f"{name} isn't installed yet.\n\nCobaltOS installs its apps in the "
+                "background after the first boot. Give it a few minutes and try again.",
+            )
+            return
+        program, args = (("flatpak", ["run", flatpak_id]) if flatpak_id
+                         else (cmd[0], cmd[1:]))
+        result = QProcess.startDetached(program, args)
+        ok = result[0] if isinstance(result, tuple) else result
+        if not ok:
+            QMessageBox.warning(self, "CobaltOS", f"Couldn't start {name}.")
+
+
+def main(argv):
+    app = QApplication(argv)
+    app.setApplicationName("CobaltOS Welcome")
+    app.setDesktopFileName("cobalt-welcome")
+    app.setStyleSheet(STYLE)
+    settings = QSettings("CobaltOS", "welcome")
+
+    if "--autostart" in argv and not settings.value("show_at_login", True, type=bool):
+        return 0
+
+    window = WelcomeWindow(settings)
+    window.show()
+
+    if "--smoke-test" in argv:
+        # Visit every page headlessly, then quit. Used by CI.
+        def visit(i=0):
+            if i < window.sidebar.count():
+                window.sidebar.setCurrentRow(i)
+                QTimer.singleShot(200, lambda: visit(i + 1))
+            else:
+                print("smoke test: visited", window.sidebar.count(), "pages OK")
+                app.quit()
+        QTimer.singleShot(200, visit)
+
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))

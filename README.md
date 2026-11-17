@@ -18,7 +18,18 @@
 | Windows 98SE – XP (DirectX 7–9) | **Lutris** or **Bottles** (Wine + DXVK) | Fast, runs natively on your GPU |
 | Vista and newer | **Steam** (Proton) or Lutris | Usually works great |
 
-Also included: Winetricks, GameMode, MangoHud, Gamescope and ProtonUp-Qt.
+Also included: Winetricks, GameMode, MangoHud, Gamescope, ProtonUp-Qt and the official 86Box ROM set.
+
+## Welcome Center
+
+On login, the **CobaltOS Welcome** app helps you get started:
+
+- **Welcome:** pick the era of your game and jump straight to the right tool
+- **86Box setup:** checks 86Box and its ROMs, with recommended virtual PCs for Windows 3.1 to ME
+- **Graphics:** shows your graphics card and driver, and tells you if you're on the wrong edition
+- **Help:** links to PCGamingWiki, WineHQ, ProtonDB, Lutris, VOGONS and more
+
+You can turn it off at login with the checkbox, and reopen it any time from the app menu.
 
 > **Note:** CobaltOS does not include any copy of Windows. To use 86Box with Windows 3.1/95/98/ME you'll need your own install media. 86Box also needs its ROM set, which is available from the [86Box ROMs repository](https://github.com/86Box/roms).
 
@@ -56,7 +67,12 @@ You can generate an offline installer ISO by following the [BlueBuild ISO guide]
 
 - `recipes/common-gaming.yml` holds the packages and apps shared by every edition. Edit this one to change what's installed.
 - `recipes/recipe.yml` / `recipes/recipe-nvidia.yml` are the per-edition recipes (base image and name).
-- `files/system/` is copied into the image root, for config files and branding.
+- `files/system/` is copied into the image root, for config files and branding:
+  - `usr/bin/cobalt-welcome`: the Welcome Center (Python + PyQt6)
+  - `usr/share/icons/hicolor/scalable/apps/cobaltos.svg`: the CobaltOS logo
+  - `etc/xdg/kcm-about-distrorc`: logo and links on KDE's "About this System" page
+- `files/scripts/cobalt-setup.sh` runs during the build.
+- The `check` workflow smoke-tests the Welcome Center headlessly on every push.
 - Every push to GitHub rebuilds the images through GitHub Actions. They also rebuild daily to pick up Fedora updates.
 
 ## Verification

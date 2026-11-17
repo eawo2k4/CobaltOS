@@ -22,11 +22,18 @@ modules:
         - gamescope
         # Handy terminal editor
         - micro
+        # Needed by the CobaltOS Welcome Center
+        - python3-pyqt6
+        - pciutils
     remove:
       packages:
         # replaced by the Firefox flatpak below
         - firefox
         - firefox-langpacks
+
+  - type: script
+    scripts:
+      - cobalt-setup.sh # welcome center permissions + icon cache
 
   - type: default-flatpaks
     configurations:
@@ -35,6 +42,8 @@ modules:
         install:
           # 86Box: emulates real 90s PCs for Windows 3.1 / 95 / 98 / ME
           - net._86box._86Box
+          # official 86Box ROM set (86Box can't start a virtual PC without it)
+          - net._86box._86Box.ROMs
           # DOSBox-X: DOS and Windows 3.1 games
           - com.dosbox_x.DOSBox-X
           # Bottles: easy Wine "bottles" per game

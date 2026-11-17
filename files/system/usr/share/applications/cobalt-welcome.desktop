@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=CobaltOS Welcome
+GenericName=Welcome Center
+Comment=Get started playing your old Windows games
+Exec=cobalt-welcome
+Icon=cobaltos
+Terminal=false
+Categories=System;Game;
+Keywords=welcome;86box;dosbox;wine;lutris;games;retro;

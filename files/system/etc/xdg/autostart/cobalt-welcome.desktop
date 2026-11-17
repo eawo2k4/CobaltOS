@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=CobaltOS Welcome
+Comment=Shows the CobaltOS Welcome Center at login (can be turned off in the app)
+Exec=cobalt-welcome --autostart
+Icon=cobaltos
+Terminal=false
+NoDisplay=true
+X-KDE-autostart-phase=2

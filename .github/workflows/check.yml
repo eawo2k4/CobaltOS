@@ -1,0 +1,38 @@
+name: check
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  welcome-app:
+    name: Welcome Center smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install Qt runtime libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libfontconfig1 libdbus-1-3
+
+      - name: Install PyQt6
+        run: pip install PyQt6
+
+      - name: Check syntax
+        run: python -m py_compile files/system/usr/bin/cobalt-welcome
+
+      - name: Open every page headlessly
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: timeout 60 python files/system/usr/bin/cobalt-welcome --smoke-test
+
+      - name: Check desktop files
+        run: |
+          sudo apt-get install -y desktop-file-utils
+          desktop-file-validate files/system/usr/share/applications/cobalt-welcome.desktop
+          desktop-file-validate files/system/etc/xdg/autostart/cobalt-welcome.desktop
