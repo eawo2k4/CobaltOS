@@ -16,6 +16,11 @@ concurrency:
   group: build-iso
   cancel-in-progress: true
 
+env:
+  # Must match image-version in recipes/*.yml. The installer environment is
+  # built from plain Fedora packages; CobaltOS itself comes from the image.
+  FEDORA_VERSION: "45"
+
 jobs:
   iso:
     name: Build ISO (${{ matrix.image }})
@@ -37,8 +42,10 @@ jobs:
           sudo docker image prune --all --force || true
           df -h /
 
-      - name: Pull the CobaltOS image
-        run: sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
+      - name: Pull the CobaltOS image and the Fedora build container
+        run: |
+          sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
+          sudo podman pull quay.io/fedora/fedora-bootc:${{ env.FEDORA_VERSION }}
 
       - name: Build the installer ISO
         run: |
@@ -51,6 +58,9 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type anaconda-iso \
             --rootfs btrfs \
+            --build-container quay.io/fedora/fedora-bootc:${{ env.FEDORA_VERSION }} \
+            --force-repo "https://dl.fedoraproject.org/pub/fedora/linux/releases/${{ env.FEDORA_VERSION }}/Everything/x86_64/os/" \
+            --force-repo "https://dl.fedoraproject.org/pub/fedora/linux/updates/${{ env.FEDORA_VERSION }}/Everything/x86_64/" \
             ghcr.io/eawo2k4/${{ matrix.image }}:latest 2>&1 | tee build.log
 
       - name: Show the error summary
