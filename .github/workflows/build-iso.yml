@@ -43,6 +43,7 @@ jobs:
       - name: Build the installer ISO
         run: |
           mkdir -p output
+          set -o pipefail
           sudo podman run --rm --privileged --pull=newer \
             --security-opt label=type:unconfined_t \
             -v ./output:/output \
@@ -50,7 +51,15 @@ jobs:
             quay.io/centos-bootc/bootc-image-builder:latest \
             --type anaconda-iso \
             --rootfs btrfs \
-            ghcr.io/eawo2k4/${{ matrix.image }}:latest
+            ghcr.io/eawo2k4/${{ matrix.image }}:latest 2>&1 | tee build.log
+
+      - name: Show the error summary
+        if: failure()
+        run: |
+          # Annotations are visible without signing in, unlike full logs.
+          msg=$(tail -n 25 build.log 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | cut -c1-300)
+          msg="${msg//'%'/'%25'}"; msg="${msg//$'\n'/'%0A'}"; msg="${msg//$'\r'/}"
+          echo "::error title=ISO build failed (${{ matrix.image }})::${msg}"
 
       - name: Name and checksum the ISO
         run: |
