@@ -38,6 +38,8 @@ You can turn it off at login with the checkbox, and reopen it any time from the 
 > [!WARNING]
 > CobaltOS is experimental. Try it in a VM or on a spare drive first.
 
+The easiest way is the [installer ISO](#installer-iso). Or, if you already run a Fedora Atomic desktop, rebase to CobaltOS:
+
 Install any Fedora Atomic desktop (for example [Fedora Kinoite](https://fedoraproject.org/atomic-desktops/kinoite/)), then rebase to CobaltOS. Swap `cobaltos` for `cobaltos-nvidia` if you have an NVIDIA card.
 
 1. Rebase to the unsigned image first, to get the signing keys and policies installed:
@@ -59,9 +61,18 @@ Install any Fedora Atomic desktop (for example [Fedora Kinoite](https://fedorapr
 
 The Fedora version is set by `image-version` in the recipes, so you won't jump to a new Fedora release by accident.
 
-## ISO
+## Installer ISO
 
-You can generate an offline installer ISO by following the [BlueBuild ISO guide](https://blue-build.org/how-to/generate-iso/). ISOs are too big to host on GitHub for free, so public releases need other hosting.
+The `build-iso` workflow builds an offline installer ISO for each edition. It uses Fedora's normal graphical installer: pick a disk, create your user, and reboot into CobaltOS.
+
+1. Go to **Actions** → **build-iso** → **Run workflow**. A run takes about 30–60 minutes.
+2. Open the finished run and download **cobaltos-iso** or **cobaltos-nvidia-iso** from the Artifacts section. You need to be signed in to GitHub, and the artifacts are kept for 30 days.
+3. Unzip the download, then write `cobaltos.iso` to a USB stick (8 GB or larger) with [Fedora Media Writer](https://fedoraproject.org/workstation/download) or [Rufus](https://rufus.ie) (use "DD image" mode), or boot it in a VM.
+4. Check the download if you like: `sha256sum -c cobaltos.iso.sha256`
+
+The installed system updates itself from `ghcr.io/eawo2k4/cobaltos`. Apps like 86Box and Steam install in the background on first boot, so give it a few minutes online.
+
+ISOs are too big for GitHub Releases (2 GB limit), so a public download needs other hosting later (for example SourceForge or the Internet Archive).
 
 ## For developers
 

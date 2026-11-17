@@ -1,0 +1,72 @@
+name: build-iso
+# Builds offline installer ISOs for each CobaltOS edition from the published
+# images, using bootc-image-builder's Anaconda ISO (the normal Fedora
+# graphical installer: pick a disk, create your user, done).
+#
+# Run it from the Actions tab -> build-iso -> "Run workflow".
+# The ISOs show up as downloadable artifacts on the run's summary page.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-iso.yml # rebuild when this file changes
+
+concurrency:
+  group: build-iso
+  cancel-in-progress: true
+
+jobs:
+  iso:
+    name: Build ISO (${{ matrix.image }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        image:
+          - cobaltos # KDE, AMD/Intel
+          - cobaltos-nvidia # KDE, NVIDIA
+    steps:
+      - name: Free up disk space
+        run: |
+          df -h /
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache/CodeQL /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h /
+
+      - name: Pull the CobaltOS image
+        run: sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
+
+      - name: Build the installer ISO
+        run: |
+          mkdir -p output
+          sudo podman run --rm --privileged --pull=newer \
+            --security-opt label=type:unconfined_t \
+            -v ./output:/output \
+            -v /var/lib/containers/storage:/var/lib/containers/storage \
+            quay.io/centos-bootc/bootc-image-builder:latest \
+            --type anaconda-iso \
+            --rootfs btrfs \
+            ghcr.io/eawo2k4/${{ matrix.image }}:latest
+
+      - name: Name and checksum the ISO
+        run: |
+          sudo chown -R "$(id -u):$(id -g)" output
+          iso=$(find output -name '*.iso' | head -1)
+          test -n "$iso"
+          mv "$iso" "${{ matrix.image }}.iso"
+          sha256sum "${{ matrix.image }}.iso" > "${{ matrix.image }}.iso.sha256"
+          ls -lh "${{ matrix.image }}".iso*
+
+      - name: Upload the ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image }}-iso
+          path: |
+            ${{ matrix.image }}.iso
+            ${{ matrix.image }}.iso.sha256
+          compression-level: 0 # ISOs are already compressed
+          retention-days: 30
