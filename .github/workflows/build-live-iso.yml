@@ -55,7 +55,7 @@ jobs:
           # newer Ubuntu blocks the user namespaces Flatpak's sandbox needs
           sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Build the live environment
         run: |

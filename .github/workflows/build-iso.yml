@@ -45,7 +45,7 @@ jobs:
           sudo docker image prune --all --force || true
           df -h /
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Pull the CobaltOS image
         run: sudo podman pull ghcr.io/eawo2k4/${{ matrix.image }}:latest
