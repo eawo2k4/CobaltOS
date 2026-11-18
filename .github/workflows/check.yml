@@ -80,6 +80,25 @@ jobs:
       - name: Check JSON files
         run: python -m json.tool files/system/etc/xdg/fastfetch/config.jsonc > /dev/null
 
+      - name: Render the wallpapers
+        run: |
+          set -e
+          sudo apt-get update
+          sudo apt-get install -y librsvg2-bin
+          mkdir -p /tmp/walls
+          A=files/system/usr/share/cobaltos/artwork
+          for svg in $A/wallpaper.svg $A/wallpapers/*.svg; do
+            grep -q '<title>.*</title>' "$svg" || { echo "::error file=$svg::wallpaper has no <title> (used as its name)"; exit 1; }
+            rsvg-convert -w 1920 -h 1080 -o "/tmp/walls/$(basename "$svg" .svg).png" "$svg"
+          done
+          ls -l /tmp/walls
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wallpaper-previews
+          path: /tmp/walls/
+          retention-days: 7
+
       - name: Install Qt runtime libraries
         run: |
           sudo apt-get update

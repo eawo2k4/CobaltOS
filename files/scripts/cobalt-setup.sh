@@ -9,14 +9,32 @@ ART=/usr/share/cobaltos/artwork
 # welcome center can run.
 chmod 755 /usr/bin/cobalt-welcome
 
-# --- Wallpaper ------------------------------------------------------------
-# Render the SVG artwork to PNGs for the KDE wallpaper package.
-WALL=/usr/share/wallpapers/CobaltOS
-mkdir -p "$WALL/contents/images"
-for size in 1920x1080 2560x1440 3840x2160; do
-    rsvg-convert -w "${size%x*}" -h "${size#*x}" -o "$WALL/contents/images/$size.png" "$ART/wallpaper.svg"
+# --- Wallpapers -----------------------------------------------------------
+# Render the SVG artwork to PNGs as KDE wallpaper packages.
+# make_wallpaper DIR-NAME SVG: the display name comes from the SVG's <title>.
+make_wallpaper() {
+    local dir=/usr/share/wallpapers/$1 svg=$2 name
+    name=$(sed -n 's:.*<title>\(.*\)</title>.*:\1:p' "$svg" | head -n 1)
+    mkdir -p "$dir/contents/images"
+    for size in 1920x1080 2560x1440 3840x2160; do
+        rsvg-convert -w "${size%x*}" -h "${size#*x}" -o "$dir/contents/images/$size.png" "$svg"
+    done
+    rsvg-convert -w 400 -h 225 -o "$dir/contents/screenshot.png" "$svg"
+    cat > "$dir/metadata.json" <<EOF
+{
+    "KPlugin": {
+        "Authors": [{ "Name": "CobaltOS" }],
+        "Id": "$1",
+        "Name": "${name:-$1}"
+    }
+}
+EOF
+}
+# the default one, plus the extra CobaltOS wallpapers
+make_wallpaper CobaltOS "$ART/wallpaper.svg"
+for svg in "$ART"/wallpapers/*.svg; do
+    make_wallpaper "CobaltOS-$(basename "$svg" .svg)" "$svg"
 done
-rsvg-convert -w 400 -h 225 -o "$WALL/contents/screenshot.png" "$ART/wallpaper.svg"
 
 # Fedora's KDE settings point the desktop, lock screen and login screen at
 # /usr/share/wallpapers/Default (and Fedora -> Default). Point it at ours.

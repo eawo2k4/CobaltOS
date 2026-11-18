@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3840 2160" width="3840" height="2160" preserveAspectRatio="xMidYMid slice">
+<title>Cobalt Day</title>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#F4F8FF"/><stop offset="0.6" stop-color="#D9E7FF"/><stop offset="1" stop-color="#B7CFFA"/>
+  </linearGradient>
+  <radialGradient id="shadow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#0B2A73" stop-opacity="0.25"/><stop offset="1" stop-color="#0B2A73" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="cobalt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3D7BFF"/><stop offset="0.55" stop-color="#0047AB"/><stop offset="1" stop-color="#002A6B"/></linearGradient>
+</defs>
+<rect width="3840" height="2160" fill="url(#bg)"/>
+<g fill="none" stroke="#2563EB" stroke-linejoin="round">
+  <polygon points="900,1440 1125,1570 1125,1830 900,1960 675,1830 675,1570" stroke-opacity="0.16" stroke-width="6"/>
+  <polygon points="1500,270 1630,345 1630,495 1500,570 1370,495 1370,345" stroke-opacity="0.14" stroke-width="5"/>
+  <polygon points="3520,140 3615,195 3615,305 3520,360 3425,305 3425,195" stroke-opacity="0.12" stroke-width="4"/>
+  <polygon points="420,520 490,560 490,640 420,680 350,640 350,560" stroke-opacity="0.12" stroke-width="4"/>
+</g>
+<g fill="#2563EB">
+<rect x="657" y="2014" width="5" height="5" opacity="0.2"/>
+<rect x="2994" y="740" width="5" height="5" opacity="0.2"/>
+<rect x="267" y="1730" width="5" height="5" opacity="0.2"/>
+<rect x="1812" y="1862" width="8" height="8" opacity="0.2"/>
+<rect x="3475" y="610" width="5" height="5" opacity="0.2"/>
+<rect x="2434" y="677" width="8" height="8" opacity="0.2"/>
+<rect x="842" y="720" width="14" height="14" opacity="0.2"/>
+<rect x="3616" y="1948" width="8" height="8" opacity="0.2"/>
+<rect x="3516" y="13" width="5" height="5" opacity="0.2"/>
+<rect x="1405" y="1138" width="5" height="5" opacity="0.2"/>
+<rect x="644" y="445" width="5" height="5" opacity="0.2"/>
+<rect x="1613" y="996" width="5" height="5" opacity="0.2"/>
+<rect x="3814" y="1179" width="8" height="8" opacity="0.2"/>
+<rect x="447" y="674" width="5" height="5" opacity="0.2"/>
+<rect x="2565" y="0" width="14" height="14" opacity="0.2"/>
+<rect x="1213" y="1400" width="14" height="14" opacity="0.2"/>
+<rect x="3269" y="129" width="5" height="5" opacity="0.2"/>
+<rect x="2830" y="461" width="8" height="8" opacity="0.2"/>
+<rect x="1531" y="65" width="5" height="5" opacity="0.2"/>
+<rect x="3279" y="108" width="5" height="5" opacity="0.2"/>
+<rect x="2960" y="1385" width="8" height="8" opacity="0.2"/>
+<rect x="2417" y="1457" width="14" height="14" opacity="0.2"/>
+<rect x="50" y="97" width="8" height="8" opacity="0.2"/>
+<rect x="3447" y="2106" width="14" height="14" opacity="0.2"/>
+<rect x="3728" y="521" width="8" height="8" opacity="0.2"/>
+<rect x="3023" y="882" width="8" height="8" opacity="0.2"/>
+<rect x="2953" y="539" width="8" height="8" opacity="0.2"/>
+<rect x="837" y="2065" width="8" height="8" opacity="0.2"/>
+<rect x="23" y="645" width="8" height="8" opacity="0.2"/>
+<rect x="2369" y="726" width="14" height="14" opacity="0.2"/>
+<rect x="882" y="352" width="5" height="5" opacity="0.2"/>
+<rect x="877" y="51" width="5" height="5" opacity="0.2"/>
+<rect x="867" y="1662" width="8" height="8" opacity="0.2"/>
+<rect x="3216" y="768" width="8" height="8" opacity="0.2"/>
+<rect x="1460" y="1215" width="8" height="8" opacity="0.2"/>
+<rect x="2103" y="917" width="5" height="5" opacity="0.2"/>
+<rect x="21" y="1739" width="5" height="5" opacity="0.2"/>
+<rect x="1197" y="1705" width="14" height="14" opacity="0.2"/>
+<rect x="1058" y="2147" width="5" height="5" opacity="0.2"/>
+<rect x="674" y="877" width="5" height="5" opacity="0.2"/>
+<rect x="2923" y="1959" width="8" height="8" opacity="0.2"/>
+<rect x="1843" y="1140" width="5" height="5" opacity="0.2"/>
+<rect x="2175" y="681" width="14" height="14" opacity="0.2"/>
+<rect x="1936" y="284" width="5" height="5" opacity="0.2"/>
+<rect x="3446" y="1571" width="14" height="14" opacity="0.2"/>
+<rect x="1856" y="793" width="5" height="5" opacity="0.2"/>
+<rect x="452" y="1744" width="8" height="8" opacity="0.2"/>
+<rect x="1809" y="1126" width="5" height="5" opacity="0.2"/>
+<rect x="2811" y="697" width="5" height="5" opacity="0.2"/>
+<rect x="2825" y="72" width="5" height="5" opacity="0.2"/>
+<rect x="3182" y="464" width="8" height="8" opacity="0.2"/>
+<rect x="2910" y="137" width="8" height="8" opacity="0.2"/>
+<rect x="1961" y="1795" width="5" height="5" opacity="0.2"/>
+<rect x="1266" y="1091" width="8" height="8" opacity="0.2"/>
+<rect x="1135" y="1952" width="8" height="8" opacity="0.2"/>
+<rect x="3687" y="1978" width="5" height="5" opacity="0.2"/>
+<rect x="2928" y="1611" width="5" height="5" opacity="0.2"/>
+<rect x="528" y="641" width="8" height="8" opacity="0.2"/>
+<rect x="3139" y="356" width="8" height="8" opacity="0.2"/>
+<rect x="3669" y="1542" width="5" height="5" opacity="0.2"/>
+</g>
+<ellipse cx="2750" cy="1900" rx="700" ry="90" fill="url(#shadow)"/>
+<g transform="translate(2010,340) scale(5.78)">
+<polygon points="128,20 222,74 222,182 128,236 34,182 34,74" fill="url(#cobalt)" stroke="url(#cobalt)" stroke-width="16" stroke-linejoin="round"/>
+<polygon points="128,20 34,74 128,128" fill="#FFFFFF" opacity="0.16"/>
+<polygon points="128,20 222,74 128,128" fill="#FFFFFF" opacity="0.07"/>
+<polygon points="34,182 128,236 128,128" fill="#000000" opacity="0.10"/>
+<polygon points="222,182 128,236 128,128" fill="#000000" opacity="0.18"/>
+<path d="M169 87 A58 58 0 1 0 169 169" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+<rect x="174" y="116" width="24" height="24" fill="#7FD4FF"/>
+</g>
+</svg>
