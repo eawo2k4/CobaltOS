@@ -140,6 +140,11 @@ cat > /usr/share/anaconda/post-scripts/cobaltos-secureboot.ks <<EOF
 if [ -d /sys/firmware/efi ] && [ -f "$SB_KEY" ]; then
     mokutil --timeout -1 || :
     printf 'universalblue\nuniversalblue\n' | mokutil --import "$SB_KEY" || :
+    if LC_ALL=C mokutil -t "$SB_KEY" 2>/dev/null | grep -q "already in the enrollment request"; then
+        run0 --user=liveuser yad --on-top --center --width=460 --title="One more step after restarting" \\
+            --window-icon=cobaltos --image=cobaltos --button=OK:0 \\
+            --text="<b>Secure Boot: allow the NVIDIA driver</b>\n\nWhen you restart, a blue <b>MOK management</b> screen appears.\nChoose <b>Enroll MOK</b> → <b>Continue</b> → <b>Yes</b>, type the password\n\n<tt><b>universalblue</b></tt>\n\nand choose <b>Reboot</b>." || :
+    fi
 fi
 %end
 EOF
@@ -155,17 +160,9 @@ for s in user-flatpak-setup.timer user-flatpak-setup.service ublue-user-setup.se
     systemctl --global disable "$s" 2>/dev/null || :
 done
 
-# welcome dialog with an "Install CobaltOS" button instead of the Welcome Center
+# KDE's live Welcome Center (started by livesys) already offers "Install
+# CobaltOS"; don't also open the CobaltOS Welcome Center on top of it
 rm -f /etc/xdg/autostart/cobalt-welcome.desktop
-install -m 755 /src/live-welcome /usr/libexec/cobaltos/live-welcome
-mkdir -p /etc/skel/.config/autostart
-cat > /etc/skel/.config/autostart/cobaltos-live-welcome.desktop <<'EOF'
-[Desktop Entry]
-Type=Application
-Name=CobaltOS Live Welcome
-Exec=/usr/libexec/cobaltos/live-welcome
-Icon=cobaltos
-EOF
 
 # taskbar: browser, installer, file manager
 sed -i '/<entry name="launchers" type="StringList">/,/<\/entry>/ s/<default>[^<]*<\/default>/<default>preferred:\/\/browser,applications:liveinst.desktop,preferred:\/\/filemanager<\/default>/' \
