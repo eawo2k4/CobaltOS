@@ -87,11 +87,13 @@ jobs:
           sudo apt-get install -y librsvg2-bin
           mkdir -p /tmp/walls
           A=files/system/usr/share/cobaltos/artwork
-          for svg in $A/wallpaper.svg $A/wallpapers/*.svg; do
+          for svg in $A/wallpaper.svg $A/login.svg $A/wallpapers/*.svg; do
             grep -q '<title>.*</title>' "$svg" || { echo "::error file=$svg::wallpaper has no <title> (used as its name)"; exit 1; }
             rsvg-convert -w 1920 -h 1080 -o "/tmp/walls/$(basename "$svg" .svg).png" "$svg"
           done
           ls -l /tmp/walls
+          # the login background embeds the wallpaper and logo; a failed embed leaves a tiny PNG
+          [ "$(stat -c %s /tmp/walls/login.png)" -gt 200000 ] || { echo "::error::login.svg rendered without its embedded images"; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:

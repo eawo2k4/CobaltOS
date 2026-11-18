@@ -96,7 +96,7 @@ ISOs are too big for GitHub Releases (2 GB limit), so a public download needs ot
   - `usr/bin/cobalt-welcome`: the Welcome Center (Python + PyQt6)
   - `usr/share/icons/hicolor/scalable/apps/cobaltos.svg`: the CobaltOS logo
   - `etc/xdg/kcm-about-distrorc`: logo and links on KDE's "About this System" page
-  - `usr/share/cobaltos/artwork/`: wallpaper and boot splash artwork (SVG, rendered to PNG during the build)
+  - `usr/share/cobaltos/artwork/`: wallpaper, login screen and boot splash artwork (SVG, rendered to PNG during the build)
   - `usr/share/cobaltos/artwork/wallpapers/`: extra wallpapers (Cobalt Horizon, Phosphor, Pixel Peaks, Honeycomb, Cobalt Day, Cobalt Minimal). Drop in another `.svg` with a `<title>` and it shows up in KDE's wallpaper picker
   - `usr/share/wallpapers/CobaltOS/`: the default KDE wallpaper (desktop, lock screen, login)
   - `usr/share/plymouth/themes/cobaltos/` + `etc/plymouth/plymouthd.conf`: the boot splash

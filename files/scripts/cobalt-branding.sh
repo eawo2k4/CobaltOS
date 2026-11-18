@@ -137,6 +137,47 @@ done
 echo "--- global theme defaults ---"
 cat "$DEFAULTS"
 
+# --- Login screen -------------------------------------------------------------
+# The default wallpaper with the CobaltOS name in the top-left corner. Kept out
+# of /usr/share/wallpapers so it doesn't show up in the desktop wallpaper list.
+LOGIN_BG=/usr/share/cobaltos/login-wallpaper
+mkdir -p "$LOGIN_BG/contents/images"
+for size in 1920x1080 2560x1440 3840x2160; do
+    rsvg-convert -w "${size%x*}" -h "${size#*x}" -o "$LOGIN_BG/contents/images/$size.png" "$ART/login.svg"
+done
+cat > "$LOGIN_BG/metadata.json" <<'EOF'
+{
+    "KPlugin": {
+        "Authors": [{ "Name": "CobaltOS" }],
+        "Id": "CobaltOS-login",
+        "Name": "CobaltOS Login"
+    }
+}
+EOF
+
+# Plasma Login Manager (Fedora 44 and newer). It has no custom themes, but the
+# background is configurable and it follows the system colour scheme. Files in
+# /usr/lib/plasmalogin/plasmalogin.conf.d are defaults; anything set in System
+# Settings -> Login Screen (/etc/plasmalogin.conf) still wins.
+if [ -d /usr/lib/plasmalogin ] || rpm -q plasma-login-manager >/dev/null 2>&1; then
+    mkdir -p /usr/lib/plasmalogin/plasmalogin.conf.d
+    cat > /usr/lib/plasmalogin/plasmalogin.conf.d/50-cobaltos.conf <<EOF
+[Greeter]
+WallpaperPluginId=org.kde.image
+
+[Greeter][Wallpaper][org.kde.image][General]
+Image=file://$LOGIN_BG/
+EOF
+    echo "Login screen: Plasma Login Manager configured"
+fi
+
+# SDDM (older Fedora), in case the base image still uses it
+SDDM_BREEZE=/usr/share/sddm/themes/breeze
+if [ -d "$SDDM_BREEZE" ]; then
+    printf '[General]\nbackground=%s\ntype=image\n' "$LOGIN_BG/contents/images/3840x2160.png" > "$SDDM_BREEZE/theme.conf.user"
+    echo "Login screen: SDDM Breeze theme configured"
+fi
+
 # --- Logos --------------------------------------------------------------------
 # Replace distro logos (app menu button, "About" pages...) with the CobaltOS logo.
 count=0
