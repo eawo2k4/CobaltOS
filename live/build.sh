@@ -13,6 +13,10 @@ IMAGE_TAG=${INSTALL_IMAGE_PAYLOAD##*:}
 # /root is a symlink on Atomic images; create its target
 mkdir -p "$(realpath /root)"
 
+# /var is empty in the image; flatpak/ostree and podman need these to exist
+mkdir -p /var/tmp /var/lib/flatpak
+chmod 1777 /var/tmp
+
 # bwrap (used by flatpak) writes /proc/sys/user/max_user_namespaces
 mount -o remount,rw /proc/sys
 
