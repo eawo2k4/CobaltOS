@@ -1,0 +1,106 @@
+name: build-live-iso
+# Builds CobaltOS live ISOs: boot from USB into the real CobaltOS desktop, try
+# it, then click "Install CobaltOS". The system and all apps are on the ISO,
+# so installing needs no internet. Same approach as Bazzite (Titanoboa).
+#
+# Run it from the Actions tab -> build-live-iso -> "Run workflow".
+# The ISOs show up as downloadable artifacts on the run's summary page.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/build-live-iso.yml
+      - live/**
+
+concurrency:
+  group: build-live-iso
+  cancel-in-progress: true
+
+jobs:
+  live-iso:
+    name: Build live ISO (${{ matrix.image }})
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        # The image that gets installed. The live session itself always runs
+        # the AMD/Intel image, since NVIDIA drivers often don't work live.
+        image:
+          - cobaltos # KDE, AMD/Intel
+          - cobaltos-nvidia # KDE, NVIDIA
+    steps:
+      - name: Free up disk space
+        run: |
+          df -h / /mnt
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc \
+            /opt/hostedtoolcache /usr/local/share/boost
+          sudo docker image prune --all --force || true
+          df -h / /mnt
+
+      # Live images are big: keep container storage on a compressed btrfs
+      # file on the runner's second disk (/mnt), like Bazzite does.
+      - name: Put container storage on /mnt
+        run: |
+          sudo truncate -s 110G /mnt/podman-storage.img
+          sudo mkfs.btrfs -f -m single -d single /mnt/podman-storage.img
+          sudo podman system reset --force
+          LOOP=$(sudo losetup --find --show --direct-io=on /mnt/podman-storage.img)
+          sudo mkdir -p /mnt/podman-storage
+          sudo mount -o compress-force=zstd:2,discard=async,noatime "$LOOP" /mnt/podman-storage
+          sudo mkdir -p /mnt/podman-storage/storage /mnt/podman-storage/tmp /var/lib/containers/storage
+          sudo mount --bind /mnt/podman-storage/storage /var/lib/containers/storage
+          # newer Ubuntu blocks the user namespaces Flatpak's sandbox needs
+          sudo sysctl -w kernel.apparmor_restrict_unprivileged_userns=0 || true
+
+      - uses: actions/checkout@v4
+
+      - name: Build the live environment
+        run: |
+          set -o pipefail
+          sudo env TMPDIR=/mnt/podman-storage/tmp podman build \
+            --cap-add sys_admin \
+            --security-opt label=disable \
+            --security-opt apparmor=unconfined \
+            --build-arg BASE_IMAGE=ghcr.io/eawo2k4/cobaltos:latest \
+            --build-arg INSTALL_IMAGE_PAYLOAD=ghcr.io/eawo2k4/${{ matrix.image }}:latest \
+            -t localhost/cobaltos-live:latest live/ 2>&1 | tee build.log
+
+      - name: Show disk space
+        if: always()
+        run: |
+          sudo df -h
+          sudo du -sh /mnt/podman-storage.img || true
+
+      - name: Build the ISO
+        id: build
+        uses: ublue-os/titanoboa@5c457c3d0518bd17e754be0fd98a60d29d26abb4 # same version as Bazzite
+        with:
+          image-ref: localhost/cobaltos-live:latest
+          iso-dest: ${{ github.workspace }}/${{ matrix.image }}-live.iso
+
+      - name: Show why it failed
+        if: failure()
+        run: |
+          if [ -f build.log ]; then
+            msg=$(tail -n 25 build.log | sed 's/%/%25/g' | sed ':a;N;$!ba;s/\n/%0A/g')
+            echo "::error title=Live environment build failed::$msg"
+          fi
+
+      - name: Checksum
+        run: |
+          mkdir -p upload
+          mv "${{ steps.build.outputs.iso-dest }}" upload/
+          cd upload
+          ls -lh
+          sha256sum ${{ matrix.image }}-live.iso | tee ${{ matrix.image }}-live.iso.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.image }}-live-iso
+          path: upload/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30

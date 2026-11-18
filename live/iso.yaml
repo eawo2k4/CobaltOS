@@ -1,0 +1,10 @@
+label: "CobaltOS-Live"
+grub2:
+  timeout: 5
+  entries:
+    - name: "Try or Install CobaltOS"
+      linux: "/images/pxeboot/vmlinuz quiet rhgb root=live:CDLABEL=CobaltOS-Live enforcing=0 rd.live.image"
+      initrd: "/images/pxeboot/initrd.img"
+    - name: "Try or Install CobaltOS (Basic Graphics Mode)"
+      linux: "/images/pxeboot/vmlinuz quiet rhgb root=live:CDLABEL=CobaltOS-Live enforcing=0 rd.live.image nomodeset"
+      initrd: "/images/pxeboot/initrd.img"

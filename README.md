@@ -61,6 +61,18 @@ Install any Fedora Atomic desktop (for example [Fedora Kinoite](https://fedorapr
 
 The Fedora version is set by `image-version` in the recipes, so you won't jump to a new Fedora release by accident.
 
+## Live ISO (try before installing)
+
+The `build-live-iso` workflow builds a **live ISO**: boot it from a USB stick and you get the real CobaltOS desktop to try out. Click **Install CobaltOS** when you are ready. CobaltOS and all its apps (86Box, DOSBox-X, Steam, Bottles...) are already on the stick, so installing needs no internet connection.
+
+1. Go to **Actions** → **build-live-iso** → **Run workflow**.
+2. Download **cobaltos-live-iso** or **cobaltos-nvidia-live-iso** from the finished run's Artifacts.
+3. Unzip it and write the `.iso` to a USB stick (16 GB or larger) the same way as below.
+
+NVIDIA edition with Secure Boot on: after installing, a blue "MOK" screen appears on the first reboot. Choose **Enroll MOK** and type the password `universalblue`, so the NVIDIA driver is allowed to load.
+
+The live system lives in `live/` (based on Bazzite's installer and [Titanoboa](https://github.com/ublue-os/titanoboa)).
+
 ## Installer ISO
 
 The `build-iso` workflow builds an offline installer ISO for each edition. It uses Fedora's normal graphical installer: pick a disk, create your user, and reboot into CobaltOS.

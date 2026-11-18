@@ -1,0 +1,17 @@
+# CobaltOS live ISO environment.
+# Turns a CobaltOS image into a live system that can install CobaltOS offline.
+# Build with: podman build --cap-add sys_admin --security-opt label=disable \
+#   --build-arg INSTALL_IMAGE_PAYLOAD=ghcr.io/eawo2k4/cobaltos:latest live/
+# then turn it into an ISO with Titanoboa (see .github/workflows/build-live-iso.yml).
+
+ARG BASE_IMAGE=ghcr.io/eawo2k4/cobaltos:latest
+ARG INSTALL_IMAGE_PAYLOAD=ghcr.io/eawo2k4/cobaltos:latest
+
+FROM $BASE_IMAGE
+ARG BASE_IMAGE
+ARG INSTALL_IMAGE_PAYLOAD
+RUN --mount=type=bind,source=./.,target=/src \
+    env \
+    BASE_IMAGE="$BASE_IMAGE" \
+    INSTALL_IMAGE_PAYLOAD="$INSTALL_IMAGE_PAYLOAD" \
+    /src/build.sh
