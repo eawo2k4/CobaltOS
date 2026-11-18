@@ -3,7 +3,7 @@
 # CobaltOS - KDE Plasma edition for AMD and Intel graphics
 # image will be published to ghcr.io/eawo2k4/cobaltos
 name: cobaltos
-description: CobaltOS - play your old Windows games (3.1 to XP and beyond) on Fedora. KDE edition for AMD/Intel.
+description: CobaltOS - your old PC games, on modern hardware. Fedora-based, KDE edition for AMD/Intel.
 
 base-image: ghcr.io/ublue-os/kinoite-main
 image-version: 45 # Fedora version; bump this when you're ready to move to a new Fedora

@@ -32,7 +32,7 @@ set_osr() {
 }
 set_osr NAME "CobaltOS"
 set_osr PRETTY_NAME "CobaltOS $VERSION_ID"
-set_osr VARIANT "Retro Gaming"
+set_osr VARIANT "Your old PC games, on modern hardware"
 set_osr LOGO "cobaltos"
 set_osr ANSI_COLOR "0;38;2;37;99;235"
 set_osr DEFAULT_HOSTNAME "cobaltos"
@@ -93,7 +93,7 @@ for key in list(plugin):
 plugin.update({
     "Id": theme_id,
     "Name": "CobaltOS",
-    "Description": "CobaltOS retro gaming theme",
+    "Description": "The CobaltOS desktop theme",
     "Authors": [{"Name": "CobaltOS"}],
     "Website": url,
 })

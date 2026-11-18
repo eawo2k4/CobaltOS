@@ -176,7 +176,7 @@ class WelcomePage(QWidget):
         top.addWidget(logo)
         titles = QVBoxLayout()
         titles.addWidget(heading("Welcome to CobaltOS", 22))
-        titles.addWidget(paragraph("Your old Windows games, on modern hardware."))
+        titles.addWidget(paragraph("Your old PC games, on modern hardware."))
         top.addLayout(titles, 1)
         root.addLayout(top)
 

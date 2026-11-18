@@ -1,5 +1,7 @@
 # CobaltOS &nbsp; [![bluebuild build badge](https://github.com/eawo2k4/cobaltos/actions/workflows/build.yml/badge.svg)](https://github.com/eawo2k4/cobaltos/actions/workflows/build.yml)
 
+**Your old PC games, on modern hardware.**
+
 **CobaltOS** is a Fedora Atomic–based Linux distro for playing your old Windows games, from Windows 3.1 through XP and beyond, on modern hardware. It's built with [BlueBuild](https://blue-build.org) on top of [Universal Blue](https://universal-blue.org).
 
 ## Editions
