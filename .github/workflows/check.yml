@@ -95,7 +95,7 @@ jobs:
           # the login background embeds the wallpaper and logo; a failed embed leaves a tiny PNG
           [ "$(stat -c %s /tmp/walls/login.png)" -gt 200000 ] || { echo "::error::login.svg rendered without its embedded images"; exit 1; }
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: wallpaper-previews
           path: /tmp/walls/
